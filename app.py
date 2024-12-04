@@ -156,12 +156,10 @@ def suggest_next_steps(current_courses=[]):
 
 @app.route('/')
 def index():
-    # Collect all unique jobs from skill_categories_to_jobs
     all_jobs = set()
     for jobs in skill_categories_to_jobs.values():
         all_jobs.update(jobs)
 
-    # Convert the set to a sorted list
     all_jobs = sorted(all_jobs)
 
     return render_template('index.html', courses=courses.keys(), jobs=all_jobs)
