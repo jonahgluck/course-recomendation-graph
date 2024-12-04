@@ -10,14 +10,13 @@ python -m venv venv
 source venv/bin/activate    # On Linux/macOS
 venv\Scripts\activate       # On Windows
 ```
-How to Run the App
 
-    Start the app: Run the following command in your terminal:
+Start the app: Run the following command in your terminal:
 ```
 python app.py
 ```
 Access the application: Open your web browser and navigate to:
 ```
-    http://127.0.0.1:5000
+http://127.0.0.1:5000
 ```
 
