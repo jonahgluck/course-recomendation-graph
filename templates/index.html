@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Pathway to Career</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 800px;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #007bff;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        .info-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px; /* Added margin to separate from the path */
+        }
+        .info-box {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 10px;
+            width: 45%;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        .info-box h2 {
+            font-size: 18px;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .info-box ul {
+            list-style-type: none;
+            padding: 0;
+            font-size: 14px;
+            color: #333;
+        }
+        .info-box ul li {
+            margin-bottom: 5px;
+        }
+        .path-container {
+            position: relative;
+            height: 800px; /* Will be adjusted dynamically */
+        }
+        .path-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .path-point {
+            position: absolute;
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .point-label {
+            position: absolute;
+            font-size: 14px;
+            color: #333;
+            margin-top: 10px;
+            width: 150px;
+            text-align: center;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pathway to Career</h1>
+        <form id="suggestion-form">
+            <div class="form-group">
+                <label for="courses">Select Courses:</label>
+                <select id="courses" name="courses" multiple>
+                    {% for course in courses %}
+                    <option value="{{ course }}">{{ course }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="jobs">Select Desired Jobs:</label>
+                <select id="jobs" name="jobs" multiple>
+                    {% for job in jobs %}
+                    <option value="{{ job }}">{{ job }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">Get Suggestions</button>
+        </form>
+
+        <!-- Separate Boxes for Skills and Jobs at the Top -->
+        <div class="info-container">
+            <div class="info-box" id="skills-box">
+                <h2>Skills</h2>
+                <ul id="skills-list"></ul>
+            </div>
+            <div class="info-box" id="jobs-box">
+                <h2>Jobs</h2>
+                <ul id="jobs-list"></ul>
+            </div>
+        </div>
+
+        <!-- Path Container for Courses Below -->
+        <div id="suggestions" class="path-container"></div>
+    </div>
+
+    <script>
+        document.getElementById('suggestion-form').onsubmit = async function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+            let response = await fetch('/get_suggestions', {
+                method: 'POST',
+                body: formData
+            });
+            let data = await response.json();
+
+            console.log("API Response:", data);
+
+            displaySkillsAndJobs(data);
+            createPathway(data);
+        }
+
+        function displaySkillsAndJobs(data) {
+            // Populate the skills list
+            const skillsList = document.getElementById('skills-list');
+            skillsList.innerHTML = ''; // Clear previous content
+            data.next_skills.forEach(skill => {
+                const listItem = document.createElement('li');
+                listItem.textContent = skill;
+                skillsList.appendChild(listItem);
+            });
+
+            // Populate the jobs list
+            const jobsList = document.getElementById('jobs-list');
+            jobsList.innerHTML = ''; // Clear previous content
+            data.next_jobs.forEach(job => {
+                const listItem = document.createElement('li');
+                listItem.textContent = job;
+                jobsList.appendChild(listItem);
+            });
+        }
+
+        function createPathway(data) {
+            const suggestionsContainer = document.getElementById('suggestions');
+            suggestionsContainer.innerHTML = ''; // Clear previous content
+
+            // Dynamically adjust the height of the container based on the number of courses
+            const totalPoints = data.next_courses.length;
+            suggestionsContainer.style.height = `${100 + totalPoints * 100}px`;
+
+            // Create an SVG path dynamically
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("class", "path-svg");
+            svg.setAttribute("viewBox", `0 0 800 ${100 + totalPoints * 100}`);
+            suggestionsContainer.appendChild(svg);
+
+            // Construct a path string for the SVG
+            let pathD = "M100 50";
+            let xOffset = 100;
+            let yOffset = 50;
+            let direction = 1; // Controls the swerve direction
+
+            // Helper function to add a curve to the path
+            function addCurve() {
+                xOffset += direction * 300;
+                yOffset += 150;
+                pathD += ` C${xOffset - direction * 150} ${yOffset - 100}, ${xOffset} ${yOffset - 100}, ${xOffset} ${yOffset}`;
+                direction *= -1; // Flip the direction
+            }
+
+            // Generate and position the points for courses only
+            let pointIndex = 0;
+            data.next_courses.forEach(course => {
+                addCurve();
+                createPoint(`Next Course: ${course}`, yOffset, xOffset);
+            });
+
+            // Create the SVG path
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", pathD);
+            path.setAttribute("stroke", "#007bff");
+            path.setAttribute("stroke-width", "4");
+            path.setAttribute("fill", "none");
+            svg.appendChild(path);
+
+            // Helper function to create a point
+            function createPoint(label, yPosition, xPosition) {
+                const point = document.createElement('div');
+                point.className = 'path-point';
+                point.style.top = `${yPosition}px`;
+                point.style.left = `${xPosition}px`;
+                point.textContent = ++pointIndex;
+                suggestionsContainer.appendChild(point);
+
+                const labelElement = document.createElement('div');
+                labelElement.className = 'point-label';
+                labelElement.style.top = `${yPosition + 50}px`;
+                labelElement.style.left = `${xPosition}px`;
+                labelElement.textContent = label;
+                suggestionsContainer.appendChild(labelElement);
+            }
+        }
+    </script>
+</body>
+</html>
+
