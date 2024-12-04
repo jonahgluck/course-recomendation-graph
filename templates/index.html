@@ -29,7 +29,7 @@
         .info-container {
             display: flex;
             justify-content: space-around;
-            margin-bottom: 30px; /* Added margin to separate from the path */
+            margin-bottom: 30px; 
         }
         .info-box {
             background-color: #e9ecef;
@@ -54,7 +54,7 @@
         }
         .path-container {
             position: relative;
-            height: 800px; /* Will be adjusted dynamically */
+            height: 800px;
         }
         .path-svg {
             position: absolute;
@@ -141,18 +141,16 @@
         }
 
         function displaySkillsAndJobs(data) {
-            // Populate the skills list
             const skillsList = document.getElementById('skills-list');
-            skillsList.innerHTML = ''; // Clear previous content
+            skillsList.innerHTML = ''; 
             data.next_skills.forEach(skill => {
                 const listItem = document.createElement('li');
                 listItem.textContent = skill;
                 skillsList.appendChild(listItem);
             });
 
-            // Populate the jobs list
             const jobsList = document.getElementById('jobs-list');
-            jobsList.innerHTML = ''; // Clear previous content
+            jobsList.innerHTML = ''; 
             data.next_jobs.forEach(job => {
                 const listItem = document.createElement('li');
                 listItem.textContent = job;
@@ -162,40 +160,34 @@
 
         function createPathway(data) {
             const suggestionsContainer = document.getElementById('suggestions');
-            suggestionsContainer.innerHTML = ''; // Clear previous content
+            suggestionsContainer.innerHTML = ''; 
 
-            // Dynamically adjust the height of the container based on the number of courses
             const totalPoints = data.next_courses.length;
             suggestionsContainer.style.height = `${100 + totalPoints * 100}px`;
 
-            // Create an SVG path dynamically
             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute("class", "path-svg");
             svg.setAttribute("viewBox", `0 0 800 ${100 + totalPoints * 100}`);
             suggestionsContainer.appendChild(svg);
 
-            // Construct a path string for the SVG
             let pathD = "M100 50";
             let xOffset = 100;
             let yOffset = 50;
-            let direction = 1; // Controls the swerve direction
-
-            // Helper function to add a curve to the path
+            let direction = 1; 
+            
             function addCurve() {
                 xOffset += direction * 300;
                 yOffset += 150;
                 pathD += ` C${xOffset - direction * 150} ${yOffset - 100}, ${xOffset} ${yOffset - 100}, ${xOffset} ${yOffset}`;
-                direction *= -1; // Flip the direction
+                direction *= -1; 
             }
 
-            // Generate and position the points for courses only
             let pointIndex = 0;
             data.next_courses.forEach(course => {
                 addCurve();
                 createPoint(`Next Course: ${course}`, yOffset, xOffset);
             });
 
-            // Create the SVG path
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
             path.setAttribute("d", pathD);
             path.setAttribute("stroke", "#007bff");
@@ -203,7 +195,6 @@
             path.setAttribute("fill", "none");
             svg.appendChild(path);
 
-            // Helper function to create a point
             function createPoint(label, yPosition, xPosition) {
                 const point = document.createElement('div');
                 point.className = 'path-point';
