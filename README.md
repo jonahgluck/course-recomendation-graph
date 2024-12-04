@@ -11,7 +11,7 @@ source venv/bin/activate    # On Linux/macOS
 venv\Scripts\activate       # On Windows
 ```
 
-First run the notebook and save the weights locally. 
+(Optional -- saved weights are provided) First run the notebook and save the weights locally. 
 
 Start the app: Run the following command in your terminal:
 ```
